@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>线上督查 · 任务包切片建议（试点 v0.3）</title>
+<style>
+
+:root{
+  --bg:#fdfcf9; --bg-card:#ffffff; --bg-accent:#f8f6f0;
+  --text:#2c2c2c; --text-secondary:#5a5a5a; --text-muted:#8a8a8a; --border:#e0dcd5;
+  --accent:#d4410b; --accent-soft:#fef3ee;
+  --blue:#1a6fb5; --blue-soft:#eef6fc;
+  --green:#2d7d46; --green-soft:#edf7f0;
+  --purple:#7b4fbf; --purple-soft:#f5f0fc;
+  --orange:#e07b30; --orange-soft:#fef7f0;
+  --red:#c0392b; --red-soft:#fef3ee;
+  --shadow:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
+  --shadow-md:0 4px 12px rgba(0,0,0,.08);
+  --radius:8px;
+  --font:"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans SC",system-ui,-apple-system,sans-serif;
+  --font-mono:"SF Mono","Cascadia Code","Fira Code","JetBrains Mono",Consolas,monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.8;font-size:16px;-webkit-font-smoothing:antialiased}
+.container{max-width:1180px;margin:0 auto;padding:0 24px 90px}
+a{color:var(--blue);text-decoration:none}
+strong{color:var(--text);font-weight:700}
+
+.topbar{position:sticky;top:0;z-index:100;background:rgba(253,252,249,.94);border-bottom:1px solid var(--border);
+  padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:52px;backdrop-filter:blur(12px);gap:12px}
+.topbar .logo{font-weight:700;font-size:14px;color:var(--accent);letter-spacing:.5px;white-space:nowrap}
+.topbar .meta{font-size:12.5px;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+.cover{text-align:center;padding:48px 20px 34px;border-bottom:1px solid var(--border);margin-bottom:28px}
+.cover .badge{display:inline-block;background:var(--accent-soft);color:var(--accent);font-size:13px;font-weight:600;
+  padding:4px 14px;border-radius:20px;margin-bottom:14px;letter-spacing:.5px}
+.cover h1{font-size:1.8rem;font-weight:800;line-height:1.4;margin-bottom:10px;letter-spacing:.3px}
+.cover .subtitle{font-size:15px;color:var(--text-secondary);line-height:1.7;max-width:800px;margin:0 auto}
+.cover .tags{margin-top:16px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.cover .tags span{font-size:12px;color:var(--text-muted);background:var(--bg-accent);padding:3px 10px;border-radius:12px}
+
+h2{font-size:1.4rem;font-weight:700;margin:46px 0 10px;padding-bottom:10px;border-bottom:2px solid var(--accent);
+  letter-spacing:.3px;scroll-margin-top:66px}
+h3{font-size:1.08rem;font-weight:700;margin:26px 0 8px;scroll-margin-top:66px}
+h4{font-size:1rem;font-weight:700;margin:20px 0 6px;color:var(--text-secondary)}
+p{margin:8px 0}
+ul,ol{padding-left:24px;margin:8px 0}
+li{margin:4px 0}
+.small{font-size:13px;color:var(--text-secondary)}
+.muted{font-size:12.5px;color:var(--text-muted)}
+code{font-family:var(--font-mono);font-size:.9em;background:var(--bg-accent);padding:2px 6px;border-radius:4px;color:var(--accent)}
+
+.panel{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;
+  margin:14px 0;box-shadow:var(--shadow)}
+.panel h3{margin-top:0}
+.panel.flush{padding:14px 16px}
+
+.note{background:var(--blue-soft);border-left:4px solid var(--blue);border-radius:0 var(--radius) var(--radius) 0;
+  padding:14px 18px;margin:14px 0}
+.note .label{font-size:11.5px;font-weight:700;letter-spacing:.8px;color:var(--blue);margin-bottom:4px}
+.note p{font-size:14.5px;margin:4px 0}
+.warn{background:var(--orange-soft);border:1px solid #f0d5b8;border-radius:var(--radius);padding:14px 18px;margin:14px 0}
+.warn strong{color:var(--orange)}
+.warn p{font-size:14.5px;margin:4px 0}
+.discipline{background:var(--accent-soft);border:1px solid #f5d5c5;border-radius:var(--radius);padding:14px 18px;
+  margin:14px 0;font-size:14.5px;color:#9b2f06}
+.discipline strong{color:#9b2f06}
+
+.table-wrap{overflow-x:auto;margin:14px 0;border-radius:var(--radius);border:1px solid var(--border);box-shadow:var(--shadow)}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+thead th{background:var(--bg-accent);font-weight:700;font-size:12.5px;text-align:left;padding:9px 12px;
+  border-bottom:2px solid var(--border);white-space:nowrap;color:var(--text-secondary);letter-spacing:.3px}
+tbody td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle;line-height:1.55}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover{background:#fefdfb}
+.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.val-strong{font-weight:700;color:var(--accent)}
+tr.total-row td{font-weight:700;background:var(--bg-accent);border-top:2px solid var(--border)}
+tr.total-row td.val-strong{color:var(--accent)}
+
+.kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin:14px 0}
+.kpi{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;box-shadow:var(--shadow)}
+.kpi .k-label{font-size:12px;color:var(--text-muted);font-weight:600}
+.kpi .k-value{font-size:1.2rem;font-weight:800;color:var(--accent);line-height:1.5}
+.kpi .k-sub{font-size:11.5px;color:var(--text-secondary);line-height:1.5}
+.kpi.green .k-value{color:var(--green)}
+.kpi.blue .k-value{color:var(--blue)}
+
+.btnbar{display:flex;gap:9px;flex-wrap:wrap;margin:14px 0}
+.btn{font-family:inherit;font-size:13px;font-weight:600;padding:7px 14px;border-radius:6px;border:1px solid var(--border);
+  background:var(--bg-card);color:var(--text-secondary);cursor:pointer;line-height:1.5}
+.btn:hover{background:var(--accent-soft);color:var(--accent);border-color:var(--accent)}
+.btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+.verdict{display:inline-block;font-size:12px;font-weight:700;padding:2px 9px;border-radius:11px;white-space:nowrap}
+.v-green{background:var(--green-soft);color:var(--green)}
+.v-yellow{background:var(--orange-soft);color:#9a5a12}
+.v-red{background:var(--red-soft);color:var(--red)}
+.v-none{background:var(--bg-accent);color:var(--text-muted)}
+
+.sources{font-size:12.5px;color:var(--text-muted);line-height:1.8}
+.sources li{margin:3px 0;word-break:break-all}
+
+@media (max-width:820px){
+  .container{padding:0 14px 60px}
+  .cover h1{font-size:1.35rem}
+  h2{font-size:1.2rem}
+}
+@media print{
+  .topbar,.btnbar,.no-print{display:none!important}
+  body{background:#fff;font-size:12.5px;line-height:1.6}
+  .container{max-width:100%;padding:0}
+  .panel,.table-wrap,.kpi-row{break-inside:avoid}
+  h2{break-after:avoid;page-break-after:avoid}
+  .btn{display:none}
+}
+/* 全景连线图（v0.2） */
+.dgm{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:8px 10px;box-shadow:var(--shadow);margin:14px 0;overflow-x:auto}
+.dgm svg{display:block;min-width:1100px;width:100%;height:auto}
+.dgm text{font-family:var(--font)}
+.dgm .lk{fill:none;stroke-width:1.6;opacity:.55;transition:opacity .12s,stroke-width .12s}
+.dgm .lk.on{opacity:1;stroke-width:2.6}
+@media print{.dgm{break-inside:avoid}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <span class="logo">🧩 线上督查 · 任务包切片建议（试点 v0.2）</span>
+  <span class="meta">成果单元打包 · 项目化交付 · 避雷三件套零出现</span>
+</div>
+
+<div class="container">
+
+<div class="cover">
+  <div class="badge">每一天 · 第一批试点 ｜ 岗位切片（任务包）设计（2026-10-15）</div>
+  <h1>线上督查岗位｜灵活用工任务包<br>切片（拆包）方案建议</h1>
+  <p class="subtitle">基于客户第一批试点岗位（商学苑-线上督查 × 20 人），依据《09.0 报告框架 v0.2》《04 任务切片化可行性方案》判定法与「四有」、《AI 任务派单平台机制说明》，把岗位拆成<strong>可独立计价、可验收的成果单元</strong>——切的是「包」，不是岗位、更不是动作。</p>
+  <div class="tags">
+    <span>可任务化·高（🟢）</span>
+    <span>项目化打包 · 成包不成点</span>
+    <span>不压工资 · 时薪 ≥23 元锚</span>
+    <span>非法律意见 · 律师复核前置</span>
+  </div>
+</div>
+
+<h2 id="s0">0｜一页速览（核心结论）</h2>
+<div class="kpi-row">
+  <div class="kpi green"><div class="k-label">岗位判定（从属性体检）</div><div class="k-value">可任务化 · 高</div><div class="k-sub">远程、标准化、成果可独立验收；无「管理/资金/食安责任」要素</div></div>
+  <div class="kpi blue"><div class="k-label">派单单元</div><div class="k-value">月度巡检项目包</div><div class="k-sub">20 席＝20 人份；包内按件计量（元/店·次 · 元/单 · 元/期）</div></div>
+  <div class="kpi"><div class="k-label">计价锚</div><div class="k-value">≈25.0 元/时</div><div class="k-sub">月报酬≈5,000 元（与名义持平）≥ 法定锚 23 元/时</div></div>
+  <div class="kpi"><div class="k-label">避雷底线</div><div class="k-value">三件套零出现</div><div class="k-sub">不能拒单 / 请假审批 / 到店签到——系统层「做不到」</div></div>
+</div>
+<ol>
+  <li><strong>切什么</strong>：把 15 项原子职责归并成 <strong>4 个任务包（P1 巡店稽核 / P2 整改复核 / P3 数据报表与支持 / P4 培训核验）</strong>＋管理性残留（决策 / 终裁类，不入池）。</li>
+  <li><strong>怎么派</strong>：对外只发「门店池月度巡检项目包」（可拒、可议价、自选时段、无过程管理）；包内按件计量用于定价与验收。</li>
+  <li><strong>怎么计价</strong>：按「月报酬 ≈5,000、折算时薪 ≥23 元/时」反推单价；建议初值 P1＝20 元/店·次、P2＝15 元/单、P3＝60 元/期、P4＝100 元/批（F 级·影子期实测校准）。</li>
+  <li><strong>考核怎么转化</strong>：现行 KPI（时效达成率、扣分制）<strong>全部改写为成果验收规则</strong>——不设扣分、不设算法考核、不设评分挂钩收入（237 号红线）。已逐项核对：客户 4 项 KPI（拆 18 个子项）<strong>100% 有任务包承接</strong>（见 §5.2 覆盖核对）。</li>
+  <li><strong>结果怎么验收</strong>：每个任务包配「验收标准明细」（可核口径＋对应 KPI 编号）——未达标＝该单位不予验收（不计价/返工），不设扣分；逐包明细见 §2.4；<strong>KPI→任务包→验收 全景连线图见 §5.3</strong>；谁验收/怎么验收见 §5.4。</li>
+  <li><strong>怎么落地</strong>：影子期（2–4 周，不改人）→ 单包试点（P1 先行）→ 全量 20 席；三张表（成本/人效/风险）门禁验收。</li>
+</ol>
+
+<h2 id="s1">1｜岗位现状（客户件拆解）</h2>
+<div class="panel">
+  <h4>岗位概述（客户件原文要点）</h4>
+  <p class="small">依托门店全域远程监控系统开展标准化线上稽核：发现门店合规问题、督促整改、配套线上课程赋能；统一全门店 FF 商品、陈列、收银服务、卫生标准；输出违规数据支撑课程迭代；联动运营部更新 SOP；留存全链路巡检取证证据链。</p>
+  <h4>职责 · KPI · 红线（原样，供切片对照）</h4>
+  <div class="table-wrap">
+  <table>
+  <thead><tr><th>维度</th><th>内容</th></tr></thead>
+  <tbody>
+  <tr><td><strong>职责</strong></td><td>① 远程巡查门店经营合规（熟食制作、服务用语、商品陈列、门店卫生）；② 违规截图取证、线上下发整改工单、跟进整改复核；③ 巡检台账归档，配合培训部完成学习核验、新员工转正考评</td></tr>
+  <tr><td><strong>KPI（绩效方案）</strong></td><td>① 巡检时效达成率 100%（日均 ≥8 家、周覆盖 100%）；② 月度巡检 ≥200 家（月计划＝门店数×4）；③ 工单 24h 内审核闭环；④ 配套交付（周/月报、高频问题、标准迭代配合、故障上报）</td></tr>
+  <tr><td><strong>电网（红线）</strong></td><td>徇私舞弊/人为放宽判定；泄露监控画面、员工影像、考核制度等保密资料</td></tr>
+  <tr><td><strong>岗位画像（我方备注）</strong></td><td>电脑端远程作业 · 计量天然（店/单/期）· 与营业时段可解耦 · 行业有第三方稽核先例 → <strong>切片条件优于门店一线岗位</strong> [F]</td></tr>
+  </tbody>
+  </table>
+  </div>
+</div>
+
+<h2 id="s2">2｜任务全景与切片（核心）</h2>
+<h3>2.1 任务原子清单（15 项 → 去向）</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>#</th><th>原子任务</th><th>频次</th><th>可交付成果</th><th>初判</th><th>去向</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>巡店稽核·熟食（FF）制作规范</td><td>每店 ≥4 次/月</td><td>巡检记录＋截图证据</td><td><span class="verdict v-green">可任务化·高</span></td><td>P1</td></tr>
+<tr><td>2</td><td>巡店稽核·服务用语</td><td>每店 ≥4 次/月</td><td>巡检记录＋截图证据</td><td><span class="verdict v-green">可任务化·高</span></td><td>P1</td></tr>
+<tr><td>3</td><td>巡店稽核·商品陈列</td><td>每店 ≥4 次/月</td><td>巡检记录＋截图证据</td><td><span class="verdict v-green">可任务化·高</span></td><td>P1</td></tr>
+<tr><td>4</td><td>巡店稽核·门店卫生</td><td>每店 ≥4 次/月</td><td>巡检记录＋截图证据</td><td><span class="verdict v-green">可任务化·高</span></td><td>P1</td></tr>
+<tr><td>5</td><td>违规截图取证</td><td>随巡检</td><td>取证包（截图＋时间戳）</td><td><span class="verdict v-green">可任务化·高</span></td><td>并入 P1（交付项）</td></tr>
+<tr><td>6</td><td>整改工单线上下发</td><td>随巡检</td><td>工单记录</td><td><span class="verdict v-green">可任务化·高</span></td><td>并入 P1（交付项）</td></tr>
+<tr><td>7</td><td>整改复核审核（通过/驳回＋理由）</td><td>按单（≤24h）</td><td>复核结论＋闭环归档</td><td><span class="verdict v-green">可任务化·高</span></td><td>P2</td></tr>
+<tr><td>8</td><td>巡检台账归档</td><td>持续</td><td>记录完整性（系统留痕）</td><td><span class="verdict v-green">可任务化·高</span></td><td>并入 P1/P2（证据链）</td></tr>
+<tr><td>9</td><td>员工线上学习核验</td><td>按批</td><td>核验记录</td><td><span class="verdict v-green">可任务化·高</span></td><td>P4</td></tr>
+<tr><td>10</td><td>新员工线上转正考评配合（材料核验）</td><td>按批</td><td>核验记录</td><td><span class="verdict v-green">可任务化·高</span></td><td>P4（仅核验，结论归培训部）</td></tr>
+<tr><td>11</td><td>违规分析报表（周报/月报）</td><td>按期</td><td>报表文件</td><td><span class="verdict v-green">可任务化·高</span></td><td>P3</td></tr>
+<tr><td>12</td><td>高频问题同步（至培训部）</td><td>按期</td><td>问题清单</td><td><span class="verdict v-green">可任务化·高</span></td><td>P3</td></tr>
+<tr><td>13</td><td>监控故障上报</td><td>随巡检</td><td>上报记录</td><td><span class="verdict v-green">可任务化·高</span></td><td>并入 P1（附带项）</td></tr>
+<tr><td>14</td><td>巡检标准迭代（SOP 调整参与）</td><td>不定期</td><td>迭代反馈/验证输入</td><td><span class="verdict v-green">可任务化·高</span></td><td>配合/反馈 → P3；决策与定稿留本部</td></tr>
+<tr><td>15</td><td>申诉/异议处理（对违规判定）</td><td>例外</td><td>—</td><td><span class="verdict v-red">管理性</span></td><td>留核心质控岗（独立性）</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>2.2 任务包设计（四包 · 每席合计 ≈5,000 元/月）</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>包</th><th>任务包</th><th>交付物（成果）</th><th>计价单位</th><th class="num">建议单价</th><th class="num">单量/人·月（估）</th><th class="num">金额/人·月（估）</th><th>验收方式</th><th>覆盖考核项（客户绩效方案）</th></tr></thead>
+<tbody>
+<tr><td><strong>P1</strong></td><td>巡店稽核包（周批次覆盖）</td><td>巡检记录＋截图取证＋问题清单（覆盖率 100%）</td><td>元/店·次</td><td class="num">20 元</td><td class="num">200</td><td class="num">4,000 元</td><td>记录完整性＋AI 抽检/人工复检</td><td class="small">KPI1 全部（1-1～1-4）＋KPI2 全部（2-1～2-4）＋KPI4-4 故障上报〔含验收化转化，见 §5.2〕</td></tr>
+<tr><td><strong>P2</strong></td><td>整改复核包</td><td>复核结论（通过/驳回＋理由）＋闭环归档</td><td>元/单</td><td class="num">15 元</td><td class="num">40</td><td class="num">600 元</td><td>证据链完整率＋抽检</td><td class="small">KPI3 全部（3-1～3-3）〔含验收化转化，见 §5.2〕</td></tr>
+<tr><td><strong>P3</strong></td><td>数据报表与支持包</td><td>周/月违规分析报表＋高频问题清单＋标准迭代反馈支持</td><td>元/期</td><td class="num">60 元</td><td class="num">5</td><td class="num">300 元</td><td>按期＋内容模板达标</td><td class="small">4-1 报表按时｜4-2 高频问题同步｜4-3 标准迭代配合〔本次修正〕｜4-6 超期→验收化｜4-7 奖励→正向评估</td></tr>
+<tr><td><strong>P4</strong></td><td>培训核验包</td><td>学习核验记录＋转正材料核验记录</td><td>元/批</td><td class="num">100 元</td><td class="num">1</td><td class="num">100 元</td><td>记录准确率抽检</td><td class="small">岗位职责③（学习核验/转正材料核验）——不属四项 KPI，作职责交付</td></tr>
+<tr class="total-row"><td>合计</td><td colspan="4">每席（＝1 人份）月度项目包</td><td class="num">—</td><td class="num val-strong">5,000 元</td><td>折算 ≈25.0 元/时（按 200h）≥ 23 元/时锚 ✓</td><td class="small">18 项考核子项 100% 承接（P1×9、P2×3、P3×5、共同×1）</td></tr>
+</tbody>
+</table>
+</div>
+<div class="note">
+  <div class="label">派单单元（项目化打包，非细粒度派单）</div>
+  <p>对外交易单元＝<strong>「门店池月度巡检项目包」</strong>：承接者对指定门店池（≈50 家）在一个月内完成 ≥4 轮覆盖＋对应复核＋报表交付。<strong>不把单个动作拆给个人</strong>——「切片越细 ≠ 越安全」，去雇佣化只在项目化打包里成立（04 主报告 §5.3）。承接者可拒包、可议价、自选作业时间（覆盖窗口内）、作业方式自主。</p>
+</div>
+<h4>2.3「四有」检查（治「活越干越多」）</h4>
+<div class="table-wrap">
+<table>
+<thead><tr><th>有边界</th><th>有标准</th><th>有兜底</th><th>有红线</th></tr></thead>
+<tbody>
+<tr><td>一包＝一个可验收成果（巡检记录/复核结论/报表/核验记录）</td><td>任务卡 10 字段（时段·时长／技能认证／定价单位／验收方式／证据要求／风险标记）</td><td>需求方不得在平台外追加要求——追加＝重新发包</td><td>不能拒单 / 请假审批 / 到店签到不进产品；不设算法考核</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>2.4 任务包验收标准明细（逐包 · 可核口径）——任务包「明确达成结果」的判定层</h3>
+<p class="small">每包给出「验收时可核的判定口径」，逐项标注对应 KPI 编号（对回 §5.2 覆盖核对与客户《绩效考核方案》原文）。判定规则：未达标＝该单位不予验收（不计价或返工，可申诉），不设扣分与惩罚性扣款；标「影子期定」者为 F 级阈值待实测。</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>包</th><th>编号</th><th>验收标准（可核口径）</th><th>对应 KPI</th></tr></thead>
+<tbody>
+<tr><td><strong>P1</strong></td><td>P1-1</td><td>覆盖率：分配门店池批次覆盖率 100%（≥4 轮/月；缺店顺延下批补足）</td><td class="small">KPI2-2 / 1-2</td></tr>
+<tr><td><strong>P1</strong></td><td>P1-2</td><td>单量：≥200 店·次/月·席（≈50 店池 × 4 轮；日均 ≥8 家当量）</td><td class="small">KPI1-1 / 2-1</td></tr>
+<tr><td><strong>P1</strong></td><td>P1-3</td><td>交付三件套：每次巡检＝巡检记录＋截图取证＋问题清单；缺一该次不予验收</td><td class="small">KPI1/2 记录基础</td></tr>
+<tr><td><strong>P1</strong></td><td>P1-4</td><td>证据链：截图含时间戳、可与门店/时间对应；台账按批次归档完整率 100%</td><td class="small">KPI3-3</td></tr>
+<tr><td><strong>P1</strong></td><td>P1-5</td><td>异常处理：监控异常（卡顿/离线）上报记录齐备；异常门店按顺延规则处理</td><td class="small">KPI1-3</td></tr>
+<tr><td><strong>P1</strong></td><td>P1-6</td><td>防伪：AI 抽检＋人工复检一致率达标（阈值影子期定）；虚报按协议违信责任处理</td><td class="small">KPI2-4</td></tr>
+<tr><td><strong>P1</strong></td><td>P1-7</td><td>转化：逾期不扣分——未覆盖顺延、不重复计价</td><td class="small">KPI1-4 / 2-3</td></tr>
+<tr><td><strong>P2</strong></td><td>P2-1</td><td>时效：单笔 ≤24h 完成审核（工作日口径；节假日规则影子期定）</td><td class="small">KPI3-1</td></tr>
+<tr><td><strong>P2</strong></td><td>P2-2</td><td>结论质量：通过/驳回＋理由（驳回须引用判定标准条目）</td><td class="small">KPI3-1</td></tr>
+<tr><td><strong>P2</strong></td><td>P2-3</td><td>证据链：复核全程留痕、完整率 100%（瑕疵单不予验收）</td><td class="small">KPI3-3</td></tr>
+<tr><td><strong>P2</strong></td><td>P2-4</td><td>闭环：当期提交单 100% 处理完毕（无超期未审积压）</td><td class="small">KPI3 目标</td></tr>
+<tr><td><strong>P2</strong></td><td>P2-5</td><td>转化：超期/瑕疵不扣分——未达标单不计价/返工、可申诉</td><td class="small">KPI3-2 / 3-3</td></tr>
+<tr><td><strong>P3</strong></td><td>P3-1</td><td>按期：周报 ×4 ＋月报 ×1 按周期交付（未按期＝该期不计价）</td><td class="small">KPI4-1 / 4-6</td></tr>
+<tr><td><strong>P3</strong></td><td>P3-2</td><td>内容达标：按模板输出违规分析＋高频问题清单（分类/门店/频次/证据索引齐全）</td><td class="small">KPI4-1 / 4-2</td></tr>
+<tr><td><strong>P3</strong></td><td>P3-3</td><td>迭代支持：按迭代轮次提交执行反馈与验证输入（决策定稿留本部）</td><td class="small">KPI4-3</td></tr>
+<tr><td><strong>P3</strong></td><td>P3-4</td><td>正向评估：优质报表/工具方法论输出 → 正向激励评估（可选）</td><td class="small">KPI4-7</td></tr>
+<tr><td><strong>P4</strong></td><td>P4-1</td><td>核验记录：学习核验＋转正材料核验记录完整、可追溯</td><td class="small">职责③（与 4-2 衔接）</td></tr>
+<tr><td><strong>P4</strong></td><td>P4-2</td><td>准确率：抽检准确率达标（阈值影子期定）</td><td class="small">职责交付</td></tr>
+<tr><td><strong>P4</strong></td><td>P4-3</td><td>边界：仅事实核验——考评结论由培训部作出</td><td class="small">避雷条款</td></tr>
+<tr class="total-row"><td>全局</td><td>—</td><td>KPI4-5「配套工作零延误、零缺失」＝由 P1–P4 各包「按期交付验收」共同覆盖</td><td class="small">KPI4-5</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>2.5 管理性职责（不入任务池）</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>职责</th><th>处理</th><th>依据</th></tr></thead>
+<tbody>
+<tr><td>巡检标准迭代（SOP 调整参与）</td><td>决策与定稿留本部；配合/反馈/验证 → P3</td><td>管理决策（🔴）与支持交付分离（覆盖 KPI4-3）</td></tr>
+<tr><td>申诉与终裁（对违规判定有异议时）</td><td>留核心质控岗（独立性）</td><td>组织融入/裁量权</td></tr>
+<tr><td>对门店的考核结论输出与对外发布</td><td>留本部（涉及员工权益与对外口径）</td><td>管理类</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2 id="s3">3｜从属性体检（7 项 · 判定法见 04 主报告 §5.1）</h2>
+<div class="table-wrap">
+<table>
+<thead><tr><th>指标</th><th>本岗位情形</th><th>判断</th></tr></thead>
+<tbody>
+<tr><td>接单自主性</td><td>可拒单、可议价、批次包自主认领；不强制派单</td><td><span class="verdict v-green">✓ 有利</span></td></tr>
+<tr><td>过程管理</td><td>无排班/考勤/请假审批/现场指挥；作业时间自主（覆盖窗口内）</td><td><span class="verdict v-green">✓ 有利</span></td></tr>
+<tr><td>定价与结算</td><td>按成果计量（元/店·次等）；验收后结算（建议周结 ≤15 日）</td><td><span class="verdict v-green">✓ 有利</span></td></tr>
+<tr><td>生产资料</td><td>使用公司监控系统与账号（必要作业工具）；自备通用设备</td><td><span class="verdict v-yellow">△ 权限最小化＋仅履约使用</span></td></tr>
+<tr><td>收入稳定性</td><td>月报酬≈5,000（接近全职水平）；不设底薪/保底；可多客户</td><td><span class="verdict v-yellow">△ 不承诺保底；量随覆盖需求</span></td></tr>
+<tr><td>组织融入</td><td>不入组织架构、无职级、无评分与收入挂钩</td><td><span class="verdict v-green">✓ 有利</span></td></tr>
+<tr><td>业务关联</td><td>管理支持职能（非主营销售）；以真实项目交付形态运行</td><td><span class="verdict v-yellow">△ 保持项目化交付</span></td></tr>
+</tbody>
+</table>
+</div>
+<p><strong>综合判定＝可任务化·高（🟢）</strong>；前置条件＝上表 △ 三项按设计执行；试点影子期留痕验证（黑名单动作 0、争议 0）。</p>
+<div class="note">
+  <div class="label">判例对照（对外可引用的最小集）</div>
+  <p>237 号：系统派单不可自主＋算法规则＋奖惩＝支配性管理核心证据 → <strong>本设计禁止限时派单/算法考核</strong>；240 号：<strong>接单完全自主时，质量运营管理可共存</strong>（白名单——本设计的法律依据）；山东「共享小时工」案：不能拒单/请假审批/到店签到三件套<strong>零出现</strong>；238 号：不批量注册个体户。</p>
+</div>
+
+<h2 id="s4">4｜计价与结算设计</h2>
+<div class="table-wrap">
+<table>
+<thead><tr><th>事项</th><th>设计</th><th>备注 / 依据</th></tr></thead>
+<tbody>
+<tr><td>单价反推</td><td>月报酬 ≈5,000 元（与名义月薪持平）×「折算时薪 ≥23 元/时」双约束；包内按件单价：20 元/店·次、15 元/单、60 元/期、100 元/批</td><td>陕人社发〔2026〕4号 23 元/时 [A]；单价属定价专项（F 级初值）</td></tr>
+<tr><td>结算</td><td>平台对公结算通道；建议周结（验收后打款），≤15 日为红线；禁止私户/微信转账</td><td>判例：微信转账发薪足以支撑劳动关系认定</td></tr>
+<tr><td>保险</td><td>商业意外险前置（未投保不派单）；法定职业伤害保障不覆盖零售 [A]</td><td>费率待询价（定价专项）——填入试点成本表「商业意外险」参数即联动</td></tr>
+<tr><td>数据与保密</td><td>承接者签保密协议；监控影像最小权限、水印留痕、审计日志；涉密对外披露类动作仅核心岗</td><td>岗位红线：泄露监控资料</td></tr>
+<tr><td>系统账号</td><td>账号＝作业工具（最小权限、仅履约使用、可审计）；<strong>不记录</strong>在线时长式考勤数据</td><td>工具归属不单独决定关系性质（判例综合判断）</td></tr>
+<tr><td>税务</td><td>平台涉税信息报送（国务院令 810 号 / 税总 16 号公告）；个税与开票属税务专项</td><td>「合规结算通道」职能，非「代发薪包装」</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2 id="s5">5｜考核转化与覆盖核对（避雷关键）</h2>
+<h3>5.1 管理动作 → 验收规则（示例）</h3>
+<p class="small">客户现行绩效方案对员工是一套管理动作；转为任务模型时<strong>逐项改写为成果验收规则</strong>——这正是「完全按照方案（合规）」的核心操作：</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>现行 KPI（管理动作）</th><th>任务模型转化（验收规则）</th><th>依据 / 备注</th></tr></thead>
+<tbody>
+<tr><td>巡检时效达成率 100%｜每周规定巡检量按时完成</td><td>→ 包交付标准：批次覆盖率 100%（系统可核）；未覆盖门店顺延下批、不重复计价</td><td>成果验收；<strong>不设「扣分」</strong></td></tr>
+<tr><td>每逾期 1 家 −2 分/家</td><td>→ 删除（惩罚性扣款禁止）；管理抓手改为验收通过率与后续批次匹配意愿</td><td>237 号；黑名单动作</td></tr>
+<tr><td>月计划总次数＝门店数×4</td><td>→ 转为「包内单量基准」：用于计价与验收口径，不作为过程考核</td><td>计量口径</td></tr>
+<tr><td>工单 24h 内审核（超期 −1 分/单）</td><td>→ 复核包交付要求：单笔 ≤24h 完成（服务标准）；未达标单不计价/返工、可申诉</td><td>非过程考核；SLA 表述建议律师复核</td></tr>
+<tr><td>虚报巡检 → 该项记 0 分</td><td>→ 数据留痕＋AI 抽检＋协议层违信责任（民事）；<strong>不设「记分」</strong></td><td>证据链；防伪条款</td></tr>
+<tr><td>配套工作（报表零延误零缺失；−5 分/次）</td><td>→ 报表包按期交付验收；优质输出可另行评估正向激励（可选）</td><td>不设「记分」/扣款</td></tr>
+</tbody>
+</table>
+</div>
+<div class="warn">
+  <p><strong>⚠️ 三条硬约束（改写红线）：</strong>① 不因交付差异扣钱（未通过验收＝该单不计价，非罚款）；② 不设评分体系与收入挂钩；③ 不用系统算法做时限倒逼（24h 为交付标准，不是系统倒计时催单）。</p>
+</div>
+
+<h3>5.2 覆盖核对：客户考核项 18/18 → 100% 有任务包承接</h3>
+<p class="small">逐项核对（客户《绩效考核方案》原文要点 → 覆盖包）；「→ 转化」＝按避雷规则把扣分/奖励等管理动作改写为验收/正向规则的对应口径：</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>编号</th><th>考核项（客户原文要点）</th><th>权重</th><th>覆盖</th><th>覆盖方式 / 转化</th><th>状态</th></tr></thead>
+<tbody>
+<tr><td>1-1</td><td>周均每日巡检 ≥8 家（大周 ≥40 家、小周 ≥48 家）</td><td>KPI1 · 35%</td><td>P1</td><td>单量基准 200 店·次/月</td><td><span class="verdict v-green">✓</span></td></tr>
+<tr><td>1-2</td><td>每周规定门店巡检量 100% 按时完成</td><td>KPI1 · 35%</td><td>P1</td><td>批次覆盖率 100% 交付标准</td><td><span class="verdict v-green">✓</span></td></tr>
+<tr><td>1-3</td><td>监控卡顿、离线等异常时主动协调，确保当周任务不逾期</td><td>KPI1 · 35%</td><td>P1</td><td>异常上报＋批次顺延规则（平台/本部协同）</td><td><span class="verdict v-green">✓</span></td></tr>
+<tr><td>1-4</td><td>每逾期完成 1 家门店巡检，−2 分/家</td><td>KPI1 · 35%</td><td>P1</td><td>→ 转化：未覆盖顺延、不重复计价（不设扣分）</td><td><span class="verdict v-green">✓</span></td></tr>
+<tr><td>2-1</td><td>月计划总次数＝月初分配门店数 × 4（每周覆盖 1 遍）</td><td>KPI2 · 30%</td><td>P1</td><td>包内单量基准（50 店池 × 4 轮）</td><td><span class="verdict v-green">✓</span></td></tr>
+<tr><td>2-2</td><td>达成率＝实际有效巡检次数 ÷ 计划总次数 × 100%</td><td>KPI2 · 30%</td><td>P1</td><td>覆盖率验收（系统数据可核）</td><td><span class="verdict v-green">✓</span></td></tr>
+<tr><td>2-3</td><td>每发现 1 家计划内门店未达成每周覆盖要求，−2 分/家</td><td>KPI2 · 30%</td><td>P1</td><td>→ 转化：同 1-4（顺延、不重复计价）</td><td><span class="verdict v-green">✓</span></td></tr>
+<tr><td>2-4</td><td>虚报巡检完成情况，如经核实该项直接记 0 分</td><td>KPI2 · 30%</td><td>P1</td><td>数据留痕＋AI 抽检＋协议层违信责任（不设记分）</td><td><span class="verdict v-green">✓</span></td></tr>
+<tr><td>3-1</td><td>门店提交整改后，24 小时内完成审核（通过/驳回）</td><td>KPI3 · 20%</td><td>P2</td><td>交付标准（成果验收要件）</td><td><span class="verdict v-green">✓</span></td></tr>
+<tr><td>3-2</td><td>超期未审（＞24h）−1 分/单</td><td>KPI3 · 20%</td><td>P2</td><td>→ 转化：未达标单不计价/返工、可申诉</td><td><span class="verdict v-green">✓</span></td></tr>
+<tr><td>3-3</td><td>证据链瑕疵 −1 分/单</td><td>KPI3 · 20%</td><td>P2</td><td>→ 转化：证据链完整率验收（不设扣分）</td><td><span class="verdict v-green">✓</span></td></tr>
+<tr><td>4-1</td><td>按时输出违规分析报表（月度/周度）</td><td>KPI4 · 15%</td><td>P3</td><td>按期交付验收</td><td><span class="verdict v-green">✓</span></td></tr>
+<tr><td>4-2</td><td>同步高频问题至培训部</td><td>KPI4 · 15%</td><td>P3</td><td>高频问题清单（随报表交付）</td><td><span class="verdict v-green">✓</span></td></tr>
+<tr><td>4-3</td><td>配合巡检标准迭代</td><td>KPI4 · 15%</td><td>P3</td><td>标准迭代反馈/验证支持；决策定稿留本部</td><td><span class="verdict v-green">✓ 本次修正</span></td></tr>
+<tr><td>4-4</td><td>及时上报监控设备故障</td><td>KPI4 · 15%</td><td>P1</td><td>巡检附带项（上报记录）</td><td><span class="verdict v-green">✓</span></td></tr>
+<tr><td>4-5</td><td>相应配套工作零延误、零缺失</td><td>KPI4 · 15%</td><td>P1–P4</td><td>各包按期交付验收（整体性指标）</td><td><span class="verdict v-green">✓</span></td></tr>
+<tr><td>4-6</td><td>未按时输出月度/周度违规分析报表，−5 分/次</td><td>KPI4 · 15%</td><td>P3</td><td>→ 转化：未达标不计价/整改（不设扣分）</td><td><span class="verdict v-green">✓</span></td></tr>
+<tr><td>4-7</td><td>报表奖励（优质 +1 / 工具方法论 +2，该项 +3 封顶）</td><td>KPI4 · 15%</td><td>P3</td><td>→ 转化：优质输出正向评估（可选激励，非扣罚）</td><td><span class="verdict v-green">✓</span></td></tr>
+</tbody>
+</table>
+</div>
+<div class="note">
+  <div class="label">结论</div>
+  <p><strong>18/18 项 100% 覆盖 ✓</strong>（P1×9、P2×3、P3×5、P1–P4 共同×1）；其中 7 项含「管理动作 → 验收/正向规则」转化（1-4、2-3、2-4、3-2、3-3、4-6、4-7）。<strong>先前版本存在 1 处缺口（4-3 配合标准迭代）——已并入 P3（反馈/验证部分；决策定稿留本部）修正。</strong>P4（培训核验）覆盖岗位职责③，不属四项 KPI 范围，作职责交付纳入包体系。</p>
+</div>
+
+<h3>5.3 全景对照图：客户 KPI 要求 → 任务包 → 验收判定（图示连线）</h3>
+<p class="small">左栏＝客户《绩效考核方案》的 KPI 与目标值（拆 18 子项，含 <span style="color:#d4410b">↷ 转化项</span>）；中栏＝承接的任务包（合规任务派单）；右栏＝该包验收时按什么可核口径判定「达成」（第九节）。每条连线＝「该项要求 → 由谁承接」；<strong>虚线＝原管理动作（扣分/奖励）已改写为验收/正向规则</strong>。鼠标悬停任一节点可高亮其连线。（谁来验收：系统全量＋AI 预筛＋验收岗仅触发——见 §5.4）</p>
+<div class="dgm">
+<svg viewBox="0 0 1180 811" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="KPI 到任务包到验收 全景连线图">
+<text x="16" y="24" font-size="13.5" font-weight="700" fill="#172c63">客户 KPI 要求（《绩效考核方案》拆 18 子项 ＋ 职责③）</text>
+<text x="430" y="24" font-size="13.5" font-weight="700" fill="#172c63">任务包承接（合规 · 任务派单）</text>
+<text x="700" y="24" font-size="13.5" font-weight="700" fill="#172c63">验收判定（可核口径 · 第九节）</text>
+<line x1="16" y1="32" x2="332" y2="32" stroke="#e0dcd5"/>
+<line x1="430" y1="32" x2="640" y2="32" stroke="#e0dcd5"/>
+<line x1="700" y1="32" x2="1160" y2="32" stroke="#e0dcd5"/>
+<rect x="8" y="52.0" width="336" height="130.0" rx="8" fill="#f8f6f0" opacity="0.75"/>
+<text x="20" y="72.0" font-size="12" font-weight="700" fill="#5a5a5a">KPI1 巡检时效达成率（35%｜目标：日均巡检 ≥8 家）</text>
+<g class="hit" data-k="1-1">
+<rect x="16" y="82.0" width="316" height="21" rx="5" fill="#ffffff" stroke="#e0dcd5"/>
+<text x="26" y="96.5" font-size="11.5" fill="#2c2c2c">日均巡检 ≥8 家（大周 ≥40／小周 ≥48）</text>
+</g>
+<g class="hit" data-k="1-2">
+<rect x="16" y="106.0" width="316" height="21" rx="5" fill="#ffffff" stroke="#e0dcd5"/>
+<text x="26" y="120.5" font-size="11.5" fill="#2c2c2c">每周巡检量 100% 按时完成</text>
+</g>
+<g class="hit" data-k="1-3">
+<rect x="16" y="130.0" width="316" height="21" rx="5" fill="#ffffff" stroke="#e0dcd5"/>
+<text x="26" y="144.5" font-size="11.5" fill="#2c2c2c">监控异常主动协调、不逾期</text>
+</g>
+<g class="hit" data-k="1-4">
+<rect x="16" y="154.0" width="316" height="21" rx="5" fill="#ffffff" stroke="#e0dcd5"/>
+<text x="26" y="168.5" font-size="11.5" fill="#2c2c2c">每逾期 1 家 −2 分/家</text>
+<text x="324" y="168.5" font-size="11.5" fill="#d4410b" text-anchor="end">↷</text>
+</g>
+<rect x="8" y="182.0" width="336" height="130.0" rx="8" fill="#f8f6f0" opacity="0.75"/>
+<text x="20" y="202.0" font-size="12" font-weight="700" fill="#5a5a5a">KPI2 月度巡检任务达标率（30%｜目标：月度巡检 ≥200 家）</text>
+<g class="hit" data-k="2-1">
+<rect x="16" y="212.0" width="316" height="21" rx="5" fill="#ffffff" stroke="#e0dcd5"/>
+<text x="26" y="226.5" font-size="11.5" fill="#2c2c2c">月计划＝门店数 × 4（每周覆盖 1 遍）</text>
+</g>
+<g class="hit" data-k="2-2">
+<rect x="16" y="236.0" width="316" height="21" rx="5" fill="#ffffff" stroke="#e0dcd5"/>
+<text x="26" y="250.5" font-size="11.5" fill="#2c2c2c">达成率＝有效巡检 ÷ 计划 ×100%</text>
+</g>
+<g class="hit" data-k="2-3">
+<rect x="16" y="260.0" width="316" height="21" rx="5" fill="#ffffff" stroke="#e0dcd5"/>
+<text x="26" y="274.5" font-size="11.5" fill="#2c2c2c">未达成每周覆盖 −2 分/家</text>
+<text x="324" y="274.5" font-size="11.5" fill="#d4410b" text-anchor="end">↷</text>
+</g>
+<g class="hit" data-k="2-4">
+<rect x="16" y="284.0" width="316" height="21" rx="5" fill="#ffffff" stroke="#e0dcd5"/>
+<text x="26" y="298.5" font-size="11.5" fill="#2c2c2c">虚报巡检完成情况记 0 分</text>
+<text x="324" y="298.5" font-size="11.5" fill="#d4410b" text-anchor="end">↷</text>
+</g>
+<rect x="8" y="312.0" width="336" height="106.0" rx="8" fill="#f8f6f0" opacity="0.75"/>
+<text x="20" y="332.0" font-size="12" font-weight="700" fill="#5a5a5a">KPI3 巡检工单处理（20%｜目标：按实际工单处理）</text>
+<g class="hit" data-k="3-1">
+<rect x="16" y="342.0" width="316" height="21" rx="5" fill="#ffffff" stroke="#e0dcd5"/>
+<text x="26" y="356.5" font-size="11.5" fill="#2c2c2c">24h 内完成审核（通过/驳回）</text>
+</g>
+<g class="hit" data-k="3-2">
+<rect x="16" y="366.0" width="316" height="21" rx="5" fill="#ffffff" stroke="#e0dcd5"/>
+<text x="26" y="380.5" font-size="11.5" fill="#2c2c2c">超期未审 −1 分/单</text>
+<text x="324" y="380.5" font-size="11.5" fill="#d4410b" text-anchor="end">↷</text>
+</g>
+<g class="hit" data-k="3-3">
+<rect x="16" y="390.0" width="316" height="21" rx="5" fill="#ffffff" stroke="#e0dcd5"/>
+<text x="26" y="404.5" font-size="11.5" fill="#2c2c2c">证据链瑕疵 −1 分/单</text>
+<text x="324" y="404.5" font-size="11.5" fill="#d4410b" text-anchor="end">↷</text>
+</g>
+<rect x="8" y="418.0" width="336" height="202.0" rx="8" fill="#f8f6f0" opacity="0.75"/>
+<text x="20" y="438.0" font-size="12" font-weight="700" fill="#5a5a5a">KPI4 配套工作交付达标（15%｜目标：按需求开展）</text>
+<g class="hit" data-k="4-1">
+<rect x="16" y="448.0" width="316" height="21" rx="5" fill="#ffffff" stroke="#e0dcd5"/>
+<text x="26" y="462.5" font-size="11.5" fill="#2c2c2c">按时输出违规分析报表</text>
+</g>
+<g class="hit" data-k="4-2">
+<rect x="16" y="472.0" width="316" height="21" rx="5" fill="#ffffff" stroke="#e0dcd5"/>
+<text x="26" y="486.5" font-size="11.5" fill="#2c2c2c">高频问题同步培训部</text>
+</g>
+<g class="hit" data-k="4-3">
+<rect x="16" y="496.0" width="316" height="21" rx="5" fill="#ffffff" stroke="#e0dcd5"/>
+<text x="26" y="510.5" font-size="11.5" fill="#2c2c2c">配合巡检标准迭代</text>
+</g>
+<g class="hit" data-k="4-4">
+<rect x="16" y="520.0" width="316" height="21" rx="5" fill="#ffffff" stroke="#e0dcd5"/>
+<text x="26" y="534.5" font-size="11.5" fill="#2c2c2c">及时上报监控设备故障</text>
+</g>
+<g class="hit" data-k="4-5">
+<rect x="16" y="544.0" width="316" height="21" rx="5" fill="#ffffff" stroke="#e0dcd5"/>
+<text x="26" y="558.5" font-size="11.5" fill="#2c2c2c">配套工作零延误、零缺失</text>
+</g>
+<g class="hit" data-k="4-6">
+<rect x="16" y="568.0" width="316" height="21" rx="5" fill="#ffffff" stroke="#e0dcd5"/>
+<text x="26" y="582.5" font-size="11.5" fill="#2c2c2c">报表超期 −5 分/次</text>
+<text x="324" y="582.5" font-size="11.5" fill="#d4410b" text-anchor="end">↷</text>
+</g>
+<g class="hit" data-k="4-7">
+<rect x="16" y="592.0" width="316" height="21" rx="5" fill="#ffffff" stroke="#e0dcd5"/>
+<text x="26" y="606.5" font-size="11.5" fill="#2c2c2c">报表奖励（+1/+2，+3 封顶）</text>
+<text x="324" y="606.5" font-size="11.5" fill="#d4410b" text-anchor="end">↷</text>
+</g>
+<rect x="8" y="620.0" width="336" height="58.0" rx="8" fill="#f8f6f0" opacity="0.75"/>
+<text x="20" y="640.0" font-size="12" font-weight="700" fill="#5a5a5a">岗位职责③（非 KPI 考核项）</text>
+<g class="hit" data-k="职3">
+<rect x="16" y="650.0" width="316" height="21" rx="5" fill="#ffffff" stroke="#e0dcd5"/>
+<text x="26" y="664.5" font-size="11.5" fill="#2c2c2c">学习核验／转正材料核验</text>
+</g>
+<path class="lk" data-k="1-1" data-p="P1" d="M 332 92.5 C 385 92.5 390 230.9 430 230.9" stroke="#1a6fb5"/>
+<path class="lk" data-k="1-2" data-p="P1" d="M 332 116.5 C 385 116.5 390 230.9 430 230.9" stroke="#1a6fb5"/>
+<path class="lk" data-k="1-3" data-p="P1" d="M 332 140.5 C 385 140.5 390 230.9 430 230.9" stroke="#1a6fb5"/>
+<path class="lk" data-k="1-4" data-p="P1" d="M 332 164.5 C 385 164.5 390 230.9 430 230.9" stroke="#1a6fb5" stroke-dasharray="5 4"/>
+<path class="lk" data-k="2-1" data-p="P1" d="M 332 222.5 C 385 222.5 390 230.9 430 230.9" stroke="#1a6fb5"/>
+<path class="lk" data-k="2-2" data-p="P1" d="M 332 246.5 C 385 246.5 390 230.9 430 230.9" stroke="#1a6fb5"/>
+<path class="lk" data-k="2-3" data-p="P1" d="M 332 270.5 C 385 270.5 390 230.9 430 230.9" stroke="#1a6fb5" stroke-dasharray="5 4"/>
+<path class="lk" data-k="2-4" data-p="P1" d="M 332 294.5 C 385 294.5 390 230.9 430 230.9" stroke="#1a6fb5" stroke-dasharray="5 4"/>
+<path class="lk" data-k="3-1" data-p="P2" d="M 332 352.5 C 385 352.5 390 376.5 430 376.5" stroke="#7b4fbf"/>
+<path class="lk" data-k="3-2" data-p="P2" d="M 332 376.5 C 385 376.5 390 376.5 430 376.5" stroke="#7b4fbf" stroke-dasharray="5 4"/>
+<path class="lk" data-k="3-3" data-p="P2" d="M 332 400.5 C 385 400.5 390 376.5 430 376.5" stroke="#7b4fbf" stroke-dasharray="5 4"/>
+<path class="lk" data-k="4-1" data-p="P3" d="M 332 458.5 C 385 458.5 390 525.7 430 525.7" stroke="#2d7d46"/>
+<path class="lk" data-k="4-2" data-p="P3" d="M 332 482.5 C 385 482.5 390 525.7 430 525.7" stroke="#2d7d46"/>
+<path class="lk" data-k="4-3" data-p="P3" d="M 332 506.5 C 385 506.5 390 525.7 430 525.7" stroke="#2d7d46"/>
+<path class="lk" data-k="4-4" data-p="P1" d="M 332 530.5 C 385 530.5 390 230.9 430 230.9" stroke="#1a6fb5"/>
+<path class="lk" data-k="4-5" data-p="全局" d="M 332 554.5 C 385 554.5 390 607.7 430 607.7" stroke="#8a8a8a"/>
+<path class="lk" data-k="4-6" data-p="P3" d="M 332 578.5 C 385 578.5 390 525.7 430 525.7" stroke="#2d7d46" stroke-dasharray="5 4"/>
+<path class="lk" data-k="4-7" data-p="P3" d="M 332 602.5 C 385 602.5 390 525.7 430 525.7" stroke="#2d7d46" stroke-dasharray="5 4"/>
+<path class="lk" data-k="职3" data-p="P4" d="M 332 660.5 C 385 660.5 390 681.7 430 681.7" stroke="#e07b30"/>
+<g class="hit" data-p="P1">
+<rect x="430" y="207.9" width="210" height="46" rx="8" fill="#eef6fc" stroke="#1a6fb5" stroke-width="1.4"/>
+<text x="442" y="226.9" font-size="12.5" font-weight="700" fill="#172c63">P1 巡店稽核包</text>
+<text x="442" y="243.9" font-size="10.5" fill="#5a5a5a">200 店·次/席·月 ｜ 元/店·次</text>
+</g>
+<line x1="640" y1="230.9" x2="700" y2="230.9" stroke="#1a6fb5" stroke-width="2.4"/>
+<g class="hit" data-p="P2">
+<rect x="430" y="353.5" width="210" height="46" rx="8" fill="#f5f0fc" stroke="#7b4fbf" stroke-width="1.4"/>
+<text x="442" y="372.5" font-size="12.5" font-weight="700" fill="#172c63">P2 整改复核包</text>
+<text x="442" y="389.5" font-size="10.5" fill="#5a5a5a">≤24h 复核 ｜ 元/单</text>
+</g>
+<line x1="640" y1="376.5" x2="700" y2="376.5" stroke="#7b4fbf" stroke-width="2.4"/>
+<g class="hit" data-p="P3">
+<rect x="430" y="502.7" width="210" height="46" rx="8" fill="#edf7f0" stroke="#2d7d46" stroke-width="1.4"/>
+<text x="442" y="521.7" font-size="12.5" font-weight="700" fill="#172c63">P3 数据报表与支持包</text>
+<text x="442" y="538.7" font-size="10.5" fill="#5a5a5a">周报×4＋月报×1 ｜ 元/期</text>
+</g>
+<line x1="640" y1="525.7" x2="700" y2="525.7" stroke="#2d7d46" stroke-width="2.4"/>
+<g class="hit" data-p="全局">
+<rect x="430" y="584.7" width="210" height="46" rx="8" fill="#f8f6f0" stroke="#8a8a8a" stroke-width="1.4"/>
+<text x="442" y="603.7" font-size="12.5" font-weight="700" fill="#172c63">全局 · 按期交付验收</text>
+<text x="442" y="620.7" font-size="10.5" fill="#5a5a5a">＝P1–P4 共同覆盖（KPI4-5）</text>
+</g>
+<line x1="640" y1="607.7" x2="700" y2="607.7" stroke="#8a8a8a" stroke-width="2.4"/>
+<g class="hit" data-p="P4">
+<rect x="430" y="658.7" width="210" height="46" rx="8" fill="#fef7f0" stroke="#e07b30" stroke-width="1.4"/>
+<text x="442" y="677.7" font-size="12.5" font-weight="700" fill="#172c63">P4 培训核验包</text>
+<text x="442" y="694.7" font-size="10.5" fill="#5a5a5a">按批核验 ｜ 元/批</text>
+</g>
+<line x1="640" y1="681.7" x2="700" y2="681.7" stroke="#e07b30" stroke-width="2.4"/>
+<g class="hit" data-p="P1">
+<rect x="700" y="173.9" width="460" height="114.0" rx="8" fill="#ffffff" stroke="#e0dcd5"/>
+<text x="712" y="192.9" font-size="12" font-weight="700" fill="#1a6fb5">P1 验收判定（第九节 P1-1～P1-7）</text>
+<text x="712" y="209.9" font-size="11.5" fill="#3d3d3d">· 覆盖率 100%：≥4 轮/月；缺店顺延下批补足</text>
+<text x="712" y="225.9" font-size="11.5" fill="#3d3d3d">· 交付三件套：记录＋截图＋问题清单（缺一不予验收）</text>
+<text x="712" y="241.9" font-size="11.5" fill="#3d3d3d">· 证据链：截图含时间戳、可与门店/时间对应</text>
+<text x="712" y="257.9" font-size="11.5" fill="#3d3d3d">· 防伪：AI 抽检＋违信责任（不设记分）</text>
+<text x="712" y="273.9" font-size="11.5" fill="#3d3d3d">· 转化：逾期不扣分——顺延、不重复计价</text>
+</g>
+<g class="hit" data-p="P2">
+<rect x="700" y="327.5" width="460" height="98.0" rx="8" fill="#ffffff" stroke="#e0dcd5"/>
+<text x="712" y="346.5" font-size="12" font-weight="700" fill="#7b4fbf">P2 验收判定（第九节 P2-1～P2-5）</text>
+<text x="712" y="363.5" font-size="11.5" fill="#3d3d3d">· 时效：单笔 ≤24h 完成审核（工作日口径）</text>
+<text x="712" y="379.5" font-size="11.5" fill="#3d3d3d">· 结论：通过/驳回＋理由（驳回引用判定条目）</text>
+<text x="712" y="395.5" font-size="11.5" fill="#3d3d3d">· 证据链完整率 100%（瑕疵单不予验收）</text>
+<text x="712" y="411.5" font-size="11.5" fill="#3d3d3d">· 闭环：当期提交单 100% 处理完毕</text>
+</g>
+<g class="hit" data-p="P3">
+<rect x="700" y="476.7" width="460" height="98.0" rx="8" fill="#ffffff" stroke="#e0dcd5"/>
+<text x="712" y="495.7" font-size="12" font-weight="700" fill="#2d7d46">P3 验收判定（第九节 P3-1～P3-4）</text>
+<text x="712" y="512.7" font-size="11.5" fill="#3d3d3d">· 按期：周报×4＋月报×1（未按期＝该期不计价）</text>
+<text x="712" y="528.7" font-size="11.5" fill="#3d3d3d">· 模板达标：分类/门店/频次/证据索引齐全</text>
+<text x="712" y="544.7" font-size="11.5" fill="#3d3d3d">· 迭代支持：按轮次提交反馈与验证输入</text>
+<text x="712" y="560.7" font-size="11.5" fill="#3d3d3d">· 正向评估：优质输出（可选激励）</text>
+</g>
+<g class="hit" data-p="全局">
+<rect x="700" y="582.7" width="460" height="50.0" rx="8" fill="#ffffff" stroke="#e0dcd5"/>
+<text x="712" y="601.7" font-size="12" font-weight="700" fill="#8a8a8a">全局 验收判定（第七节 4-5）</text>
+<text x="712" y="618.7" font-size="11.5" fill="#3d3d3d">· 各包「按期交付验收」＝零延误、零缺失</text>
+</g>
+<g class="hit" data-p="P4">
+<rect x="700" y="640.7" width="460" height="82.0" rx="8" fill="#ffffff" stroke="#e0dcd5"/>
+<text x="712" y="659.7" font-size="12" font-weight="700" fill="#e07b30">P4 验收判定（第九节 P4-1～P4-3）</text>
+<text x="712" y="676.7" font-size="11.5" fill="#3d3d3d">· 核验记录完整、可追溯</text>
+<text x="712" y="692.7" font-size="11.5" fill="#3d3d3d">· 抽检准确率达标（阈值影子期定）</text>
+<text x="712" y="708.7" font-size="11.5" fill="#3d3d3d">· 仅事实核验——结论由培训部作出</text>
+</g>
+<line x1="16" y1="746.7" x2="56" y2="746.7" stroke="#5a5a5a" stroke-width="2"/>
+<text x="64" y="750.7" font-size="11.5" fill="#5a5a5a">直接承接（成果验收、按件计价）</text>
+<line x1="270" y1="746.7" x2="310" y2="746.7" stroke="#d4410b" stroke-width="2" stroke-dasharray="5 4"/>
+<text x="318" y="750.7" font-size="11.5" fill="#5a5a5a">↷ 管理动作已转化（扣分/奖励 → 验收/正向规则，共 7 项）</text>
+<rect x="800" y="739.7" width="11" height="11" rx="2" fill="#1a6fb5"/>
+<text x="815" y="749.7" font-size="11.5" fill="#5a5a5a">P1</text>
+<rect x="876" y="739.7" width="11" height="11" rx="2" fill="#7b4fbf"/>
+<text x="891" y="749.7" font-size="11.5" fill="#5a5a5a">P2</text>
+<rect x="952" y="739.7" width="11" height="11" rx="2" fill="#2d7d46"/>
+<text x="967" y="749.7" font-size="11.5" fill="#5a5a5a">P3</text>
+<rect x="1028" y="739.7" width="11" height="11" rx="2" fill="#e07b30"/>
+<text x="1043" y="749.7" font-size="11.5" fill="#5a5a5a">P4</text>
+<rect x="1104" y="739.7" width="11" height="11" rx="2" fill="#8a8a8a"/>
+<text x="1119" y="749.7" font-size="11.5" fill="#5a5a5a">全局</text>
+<text x="16" y="776.7" font-size="12" font-weight="700" fill="#2d7d46">18/18 项 100% 承接 ✓</text>
+<text x="180" y="776.7" font-size="11.5" fill="#5a5a5a">合规要点：可拒单 · 无过程管理 · 成果验收 · 按件计价 · 不设扣分（详见 §6 避雷红线）</text>
+</svg>
+</div>
+
+<h3>5.4 验收主体与流程（谁来验收 · 怎么验收 · 边界）</h3>
+<p class="small">总原则：<strong>验收只认成果、不做管理动作</strong>；角色分离＝「派单的不验收、验收的不管过程」；验收标准发单前公示（承接者接单即知验收口径）。</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>通道</th><th>方式</th><th>核验内容</th><th>执行方</th></tr></thead>
+<tbody>
+<tr><td><strong>第一道</strong></td><td>系统自动 · 全量</td><td>覆盖率 / 单量 / 时效时间戳 / 交付物完整性 / 证据链字段 / 闭环率 → 数据比对，自动通过或挂起</td><td>平台核验引擎</td></tr>
+<tr><td><strong>第二道</strong></td><td>AI 质检 · 全量预筛</td><td>截图有效性、重复与造假模式、时间-位置一致性 → 异常标记（验收即证据）</td><td>平台 AI 质检</td></tr>
+<tr><td><strong>第三道</strong></td><td>人工 · 仅触发</td><td>只处理【抽检样本 ＋ 系统/AI 标记项 ＋ 申诉复核】——不看过程、只认成果</td><td>商学苑指定验收岗</td></tr>
+</tbody>
+</table>
+</div>
+<div class="table-wrap">
+<table>
+<thead><tr><th>验收岗权限边界（写死）</th><th>内容</th></tr></thead>
+<tbody>
+<tr><td><span class="verdict v-green">✓ 只做</span></td><td>对照公示标准判「通过/不通过」并留痕；抽检与申诉复核；按规则出结论</td></tr>
+<tr><td><span class="verdict v-red">✗ 不做</span></td><td>不指挥作业过程、不排班、不考勤、不奖惩、不追加平台外要求（追加＝重新发单）</td></tr>
+</tbody>
+</table>
+</div>
+<ul class="small">
+<li><strong>流程与时限（建议 · 影子期校准）</strong>：批次交付后 ≤2 个工作日完成判定；质量类抽检 ≥5%（阈值影子期定）；抽检一致率达标 → 整批通过。</li>
+<li><strong>不合格处置</strong>：该单位不予验收（不计价/返工）；批量不达标 → 复核并收紧后续批次匹配（运营动作，非罚款）；承接者可申诉 → 验收岗按公示规则复核（门店与店长不参与验收环节）。</li>
+<li><strong>验收 → 结算</strong>：验收通过 → 平台结算通道打款（四流合一：验收流与资金流对应留痕）。</li>
+</ul>
+<div class="note">
+  <div class="label">为什么「需求方验收」不等于「雇主验收」</div>
+  <p>① 承揽关系中「定作人的必要监督检验权」是固有内容（09.0 附录 G · 民法典 770 条口径）——验收主体是需求方，本身不构成雇佣证据；② 240 号（白名单）：接单完全自主时，运营质量验收/管理可共存；237 号穿透的是「不可拒单＋算法＋奖惩」——风险在「方式管理化」，不在验收主体身份；③ 门店/店长<strong>零参与验收</strong>（利益冲突＋现场管理风险）——门店的角色＝被稽核对象与整改执行方（独立业务流）。<strong>表述纪律</strong>：本设计＝「无支配性管理特征、可举证可审计」；个案认定属整体事实判断（非法律意见，落地前律师复核）。</p>
+</div>
+
+<h2 id="s6">6｜避雷红线清单（试点版）</h2>
+<ol>
+  <li><strong>系统层禁配（「做不到」）</strong>：强制派单/不可拒单、请假审批、到店签到/考勤打卡、算法限时逼单、评分与收入挂钩、惩罚性扣款。</li>
+  <li><strong>结算纪律</strong>：平台对公通道、≤15 日；私户/微信转账零容忍。</li>
+  <li><strong>保险前置</strong>：未投保不派单；险种与费率定价专项落。</li>
+  <li><strong>主体纪律</strong>：不批量注册个体户、不做代发薪包装、平台不参与（现场/过程）指挥；合同主体＝用工主体＝发薪主体一致。</li>
+  <li><strong>交付纪律</strong>：成包不成点；需求方不得平台外追加要求（追加＝重新发单）。</li>
+  <li><strong>数据纪律</strong>：影像数据最小权限、脱敏与留痕；对外披露类动作仅核心岗。</li>
+  <li><strong>表述纪律</strong>：不说「不构成劳动关系/零风险」；说「无支配性管理特征/可举证可审计/个案事实判断」。</li>
+  <li><strong>过渡纪律（存量 20 人）</strong>：自愿承接、不强制转换；不承接者留合规雇佣或另行安置；转换与承接全程留痕。</li>
+</ol>
+
+<h2 id="s7">7｜试点路径与门禁</h2>
+<div class="table-wrap">
+<table>
+<thead><tr><th>步骤</th><th>动作</th><th>产出 / 门禁</th></tr></thead>
+<tbody>
+<tr><td>1 · 影子期（2–4 周）</td><td>不改人、不改流程；并行跑任务包口径与数据（单量/时长/单价校准、证据链跑通）</td><td>任务卡实测数据；单价校准表</td></tr>
+<tr><td>2 · 单包试点</td><td>P1 巡店稽核包先行（自愿承接），跑通「发布—认领—交付—验收—结算」闭环</td><td>闭环跑通记录；首笔结算留痕</td></tr>
+<tr><td>3 · 全量（20 席）</td><td>四类包全量上线；验收与申诉线跑通</td><td>全量运行清单</td></tr>
+<tr><td>4 · 门禁验收</td><td>三张表：成本变化 / 人效变化 / 风险与门槛；黑名单动作 0、争议 0、时薪合规 100%</td><td>三张表全过才进入下一阶段（口径见 09.0 §5）</td></tr>
+<tr><td>5 · 复核节奏</td><td>每阶段末双方复核；承揽口径不适用 4/24 工时红线，但全程留痕须完备</td><td>复核纪要（留档）</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2 id="s8">8｜边界、待办与配套</h2>
+<div class="panel flush">
+  <h4>待办（落地前）</h4>
+  <ul class="small">
+    <li>律师复核：任务承揽协议文本、SLA 表述、申诉机制（非法律意见，落地前置）。</li>
+    <li>定价专项：单价终值与结算周期（本页为 F 级初值）；意外险询价。</li>
+    <li>影子期实测：逐任务分钟级时长、工单真实单量（回收数据后重算单价，约束＝折算时薪 ≥23 元/时）。</li>
+    <li>门店池名册与系统权限方案（监控影像最小权限、审计日志）；承接者招募/自愿承接方案。</li>
+  </ul>
+  <h4>配套</h4>
+  <ul class="small">
+    <li>成本口径（B vs C）见同目录 <a href="https://zhaoleyu79-ux.github.io/everyday-pilot-cost/">《12.线上督查试点-成本对比（B vs C）.html》</a>；C 态即按本页 P1–P4 口径计价。</li>
+    <li>明细表：11.商学苑-线上督查（胜任力模型+岗位职责+面试评估表）V1.4.xlsx →「试点·线上督查切片」页（单价与成本页联动；历史版本见 06 落地执行/归档/）。</li>
+    <li>方法论：09.0 §3–§4｜04 主报告/判定矩阵/机制说明｜09.5 客问预判｜09.4 P18/P19。</li>
+  </ul>
+</div>
+
+<div class="discipline">
+  <p><strong>口径声明：</strong>本页为设计建议稿 v0.3（2026-10-15），非法律意见；判定口径＝可任务化 高/中/低（2026-10-10 全库统一，本轮不使用非全日制容器）；单价与单量为 F 级估算，试点实测校准；对外展示前按 09.5 纪律复核。历史版本：归档/（v0.1–v0.2）；本版（v0.3）与工作簿 V1.4 配套。</p>
+</div>
+
+<p class="muted">生成：2026-10-15 ｜ 数据源：《06 落地执行/11.商学苑-线上督查（胜任力模型+岗位职责+面试评估表）V1.3.xlsx》｜配套：<a href="https://zhaoleyu79-ux.github.io/everyday-pilot-cost/">《12.线上督查试点-成本对比（B vs C）.html》</a></p>
+
+</div>
+<script>
+(function(){
+  var box=document.querySelector('.dgm'); if(!box) return;
+  var paths=box.querySelectorAll('path.lk');
+  function set(el,on){
+    var k=el.getAttribute('data-k'), p=el.getAttribute('data-p');
+    for(var i=0;i<paths.length;i++){
+      var pt=paths[i];
+      if((k&&pt.getAttribute('data-k')===k)||(p&&pt.getAttribute('data-p')===p)){
+        pt.classList.toggle('on',on);
+      }
+    }
+  }
+  var hits=box.querySelectorAll('g.hit');
+  for(var i=0;i<hits.length;i++){
+    (function(el){
+      el.addEventListener('mouseenter',function(){set(el,true)});
+      el.addEventListener('mouseleave',function(){set(el,false)});
+    })(hits[i]);
+  }
+})();
+</script>
+</body>
+</html>
