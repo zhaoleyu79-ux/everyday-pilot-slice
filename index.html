@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex">
-<title>线上督查 · 任务包切片建议（试点 v0.3）</title>
+<title>线上督查 · 任务包切片建议（试点 v0.4）</title>
 <style>
 
 :root{
@@ -128,7 +128,7 @@ tr.total-row td.val-strong{color:var(--accent)}
 <body>
 
 <div class="topbar">
-  <span class="logo">🧩 线上督查 · 任务包切片建议（试点 v0.3）</span>
+  <span class="logo">🧩 线上督查 · 任务包切片建议（试点 v0.4）</span>
   <span class="meta">成果单元打包 · 项目化交付 · 避雷三件套零出现</span>
 </div>
 
@@ -159,6 +159,7 @@ tr.total-row td.val-strong{color:var(--accent)}
   <li><strong>怎么计价</strong>：按「月报酬 ≈5,000、折算时薪 ≥23 元/时」反推单价；建议初值 P1＝20 元/店·次、P2＝15 元/单、P3＝60 元/期、P4＝100 元/批（F 级·影子期实测校准）。</li>
   <li><strong>考核怎么转化</strong>：现行 KPI（时效达成率、扣分制）<strong>全部改写为成果验收规则</strong>——不设扣分、不设算法考核、不设评分挂钩收入（237 号红线）。已逐项核对：客户 4 项 KPI（拆 18 个子项）<strong>100% 有任务包承接</strong>（见 §5.2 覆盖核对）。</li>
   <li><strong>结果怎么验收</strong>：每个任务包配「验收标准明细」（可核口径＋对应 KPI 编号）——未达标＝该单位不予验收（不计价/返工），不设扣分；逐包明细见 §2.4；<strong>KPI→任务包→验收 全景连线图见 §5.3</strong>；谁验收/怎么验收见 §5.4。</li>
+  <li><strong>交付怎么保障</strong>：不罚钱但保证做完——交付时限＋缺口 <strong>48h 回池重发</strong>＋供给冗余；持续违约 → 暂停邀请（市场后果）；未达标全程留痕（为信用积分铺垫）——见 §5.5。</li>
   <li><strong>怎么落地</strong>：影子期（2–4 周，不改人）→ 单包试点（P1 先行）→ 全量 20 席；三张表（成本/人效/风险）门禁验收。</li>
 </ol>
 
@@ -238,26 +239,27 @@ tr.total-row td.val-strong{color:var(--accent)}
 <table>
 <thead><tr><th>包</th><th>编号</th><th>验收标准（可核口径）</th><th>对应 KPI</th></tr></thead>
 <tbody>
-<tr><td><strong>P1</strong></td><td>P1-1</td><td>覆盖率：分配门店池批次覆盖率 100%（≥4 轮/月；缺店顺延下批补足）</td><td class="small">KPI2-2 / 1-2</td></tr>
-<tr><td><strong>P1</strong></td><td>P1-2</td><td>单量：≥200 店·次/月·席（≈50 店池 × 4 轮；日均 ≥8 家当量）</td><td class="small">KPI1-1 / 2-1</td></tr>
+<tr><td><strong>P1</strong></td><td>P1-1</td><td>覆盖率：周批次覆盖率 100%（每周覆盖 1 遍；≥4 轮/月）；交付时限＝周批次截止按周公示（示例：周日 24:00）；缺口 48h 内回池重发</td><td class="small">KPI2-2 / 1-2</td></tr>
+<tr><td><strong>P1</strong></td><td>P1-2</td><td>单量：≥200 店·次/月·席（≈50 店池 × 4 轮；周量随大/小周 ≈40–48 浮动；日均 ≥8 家当量）；未完成部分不计价</td><td class="small">KPI1-1 / 2-1</td></tr>
 <tr><td><strong>P1</strong></td><td>P1-3</td><td>交付三件套：每次巡检＝巡检记录＋截图取证＋问题清单；缺一该次不予验收</td><td class="small">KPI1/2 记录基础</td></tr>
 <tr><td><strong>P1</strong></td><td>P1-4</td><td>证据链：截图含时间戳、可与门店/时间对应；台账按批次归档完整率 100%</td><td class="small">KPI3-3</td></tr>
-<tr><td><strong>P1</strong></td><td>P1-5</td><td>异常处理：监控异常（卡顿/离线）上报记录齐备；异常门店按顺延规则处理</td><td class="small">KPI1-3</td></tr>
-<tr><td><strong>P1</strong></td><td>P1-6</td><td>防伪：AI 抽检＋人工复检一致率达标（阈值影子期定）；虚报按协议违信责任处理</td><td class="small">KPI2-4</td></tr>
-<tr><td><strong>P1</strong></td><td>P1-7</td><td>转化：逾期不扣分——未覆盖顺延、不重复计价</td><td class="small">KPI1-4 / 2-3</td></tr>
-<tr><td><strong>P2</strong></td><td>P2-1</td><td>时效：单笔 ≤24h 完成审核（工作日口径；节假日规则影子期定）</td><td class="small">KPI3-1</td></tr>
+<tr><td><strong>P1</strong></td><td>P1-5</td><td>异常处理：监控上报记录齐备；系统故障等非承接者原因凭记录不计缺口；故障修复后回池补做</td><td class="small">KPI1-3</td></tr>
+<tr><td><strong>P1</strong></td><td>P1-6</td><td>防伪：AI 抽检＋一致率达标（阈值影子期定）；查实虚报：该批不予验收（不计价）＋违信责任＋暂停邀请（人工复核·可申诉）</td><td class="small">KPI2-4</td></tr>
+<tr><td><strong>P1</strong></td><td>P1-7</td><td>转化：逾期不扣分——未覆盖不计价；缺口 48h 回池重发；连续 2 批未完成 → 暂停邀请</td><td class="small">KPI1-4 / 2-3</td></tr>
+<tr><td><strong>P1</strong></td><td>P1-8</td><td>履约兜底：缺口回池重发；回池任务 48h 到位率 ≥95%（平台指标·示例）；未达标事件自动写入履约记录</td><td class="small">KPI1-2 / 4-5</td></tr>
+<tr><td><strong>P2</strong></td><td>P2-1</td><td>时效：单笔 ≤24h 完成审核（工作日口径；节假日影子期定）；超 24h 未审 → 不计价＋24h 内回池重发</td><td class="small">KPI3-1</td></tr>
 <tr><td><strong>P2</strong></td><td>P2-2</td><td>结论质量：通过/驳回＋理由（驳回须引用判定标准条目）</td><td class="small">KPI3-1</td></tr>
 <tr><td><strong>P2</strong></td><td>P2-3</td><td>证据链：复核全程留痕、完整率 100%（瑕疵单不予验收）</td><td class="small">KPI3-3</td></tr>
 <tr><td><strong>P2</strong></td><td>P2-4</td><td>闭环：当期提交单 100% 处理完毕（无超期未审积压）</td><td class="small">KPI3 目标</td></tr>
-<tr><td><strong>P2</strong></td><td>P2-5</td><td>转化：超期/瑕疵不扣分——未达标单不计价/返工、可申诉</td><td class="small">KPI3-2 / 3-3</td></tr>
-<tr><td><strong>P3</strong></td><td>P3-1</td><td>按期：周报 ×4 ＋月报 ×1 按周期交付（未按期＝该期不计价）</td><td class="small">KPI4-1 / 4-6</td></tr>
+<tr><td><strong>P2</strong></td><td>P2-5</td><td>转化：超期/瑕疵不扣分——未达标单不计价/返工、可申诉；连续 2 期超期率超阈值 → 暂停邀请</td><td class="small">KPI3-2 / 3-3</td></tr>
+<tr><td><strong>P3</strong></td><td>P3-1</td><td>按期：周报 ×4 ＋月报 ×1；未按期＝该期不计价＋回池补齐；连续 2 期未交 → 暂停邀请</td><td class="small">KPI4-1 / 4-6</td></tr>
 <tr><td><strong>P3</strong></td><td>P3-2</td><td>内容达标：按模板输出违规分析＋高频问题清单（分类/门店/频次/证据索引齐全）</td><td class="small">KPI4-1 / 4-2</td></tr>
 <tr><td><strong>P3</strong></td><td>P3-3</td><td>迭代支持：按迭代轮次提交执行反馈与验证输入（决策定稿留本部）</td><td class="small">KPI4-3</td></tr>
 <tr><td><strong>P3</strong></td><td>P3-4</td><td>正向评估：优质报表/工具方法论输出 → 正向激励评估（可选）</td><td class="small">KPI4-7</td></tr>
 <tr><td><strong>P4</strong></td><td>P4-1</td><td>核验记录：学习核验＋转正材料核验记录完整、可追溯</td><td class="small">职责③（与 4-2 衔接）</td></tr>
 <tr><td><strong>P4</strong></td><td>P4-2</td><td>准确率：抽检准确率达标（阈值影子期定）</td><td class="small">职责交付</td></tr>
 <tr><td><strong>P4</strong></td><td>P4-3</td><td>边界：仅事实核验——考评结论由培训部作出</td><td class="small">避雷条款</td></tr>
-<tr class="total-row"><td>全局</td><td>—</td><td>KPI4-5「配套工作零延误、零缺失」＝由 P1–P4 各包「按期交付验收」共同覆盖</td><td class="small">KPI4-5</td></tr>
+<tr class="total-row"><td>全局</td><td>—</td><td>KPI4-5「零延误、零缺失」＝各包按期交付共同覆盖；任一包型连续未完成 → 触发回池重发＋准入复核</td><td class="small">KPI4-5</td></tr>
 </tbody>
 </table>
 </div>
@@ -339,20 +341,20 @@ tr.total-row td.val-strong{color:var(--accent)}
 <tr><td>1-1</td><td>周均每日巡检 ≥8 家（大周 ≥40 家、小周 ≥48 家）</td><td>KPI1 · 35%</td><td>P1</td><td>单量基准 200 店·次/月</td><td><span class="verdict v-green">✓</span></td></tr>
 <tr><td>1-2</td><td>每周规定门店巡检量 100% 按时完成</td><td>KPI1 · 35%</td><td>P1</td><td>批次覆盖率 100% 交付标准</td><td><span class="verdict v-green">✓</span></td></tr>
 <tr><td>1-3</td><td>监控卡顿、离线等异常时主动协调，确保当周任务不逾期</td><td>KPI1 · 35%</td><td>P1</td><td>异常上报＋批次顺延规则（平台/本部协同）</td><td><span class="verdict v-green">✓</span></td></tr>
-<tr><td>1-4</td><td>每逾期完成 1 家门店巡检，−2 分/家</td><td>KPI1 · 35%</td><td>P1</td><td>→ 转化：未覆盖顺延、不重复计价（不设扣分）</td><td><span class="verdict v-green">✓</span></td></tr>
+<tr><td>1-4</td><td>每逾期完成 1 家门店巡检，−2 分/家</td><td>KPI1 · 35%</td><td>P1</td><td>→ 转化：未覆盖不计价；缺口 48h 回池重发；连续未完成暂停邀请（不设扣分）</td><td><span class="verdict v-green">✓</span></td></tr>
 <tr><td>2-1</td><td>月计划总次数＝月初分配门店数 × 4（每周覆盖 1 遍）</td><td>KPI2 · 30%</td><td>P1</td><td>包内单量基准（50 店池 × 4 轮）</td><td><span class="verdict v-green">✓</span></td></tr>
 <tr><td>2-2</td><td>达成率＝实际有效巡检次数 ÷ 计划总次数 × 100%</td><td>KPI2 · 30%</td><td>P1</td><td>覆盖率验收（系统数据可核）</td><td><span class="verdict v-green">✓</span></td></tr>
-<tr><td>2-3</td><td>每发现 1 家计划内门店未达成每周覆盖要求，−2 分/家</td><td>KPI2 · 30%</td><td>P1</td><td>→ 转化：同 1-4（顺延、不重复计价）</td><td><span class="verdict v-green">✓</span></td></tr>
-<tr><td>2-4</td><td>虚报巡检完成情况，如经核实该项直接记 0 分</td><td>KPI2 · 30%</td><td>P1</td><td>数据留痕＋AI 抽检＋协议层违信责任（不设记分）</td><td><span class="verdict v-green">✓</span></td></tr>
+<tr><td>2-3</td><td>每发现 1 家计划内门店未达成每周覆盖要求，−2 分/家</td><td>KPI2 · 30%</td><td>P1</td><td>→ 转化：同 1-4（不计价＋48h 回池＋连续暂停邀请）</td><td><span class="verdict v-green">✓</span></td></tr>
+<tr><td>2-4</td><td>虚报巡检完成情况，如经核实该项直接记 0 分</td><td>KPI2 · 30%</td><td>P1</td><td>数据留痕＋AI 抽检；虚报查实：不计价＋违信责任＋暂停邀请</td><td><span class="verdict v-green">✓</span></td></tr>
 <tr><td>3-1</td><td>门店提交整改后，24 小时内完成审核（通过/驳回）</td><td>KPI3 · 20%</td><td>P2</td><td>交付标准（成果验收要件）</td><td><span class="verdict v-green">✓</span></td></tr>
-<tr><td>3-2</td><td>超期未审（＞24h）−1 分/单</td><td>KPI3 · 20%</td><td>P2</td><td>→ 转化：未达标单不计价/返工、可申诉</td><td><span class="verdict v-green">✓</span></td></tr>
+<tr><td>3-2</td><td>超期未审（＞24h）−1 分/单</td><td>KPI3 · 20%</td><td>P2</td><td>→ 转化：不计价/返工、可申诉；超 24h 单回池重发</td><td><span class="verdict v-green">✓</span></td></tr>
 <tr><td>3-3</td><td>证据链瑕疵 −1 分/单</td><td>KPI3 · 20%</td><td>P2</td><td>→ 转化：证据链完整率验收（不设扣分）</td><td><span class="verdict v-green">✓</span></td></tr>
 <tr><td>4-1</td><td>按时输出违规分析报表（月度/周度）</td><td>KPI4 · 15%</td><td>P3</td><td>按期交付验收</td><td><span class="verdict v-green">✓</span></td></tr>
 <tr><td>4-2</td><td>同步高频问题至培训部</td><td>KPI4 · 15%</td><td>P3</td><td>高频问题清单（随报表交付）</td><td><span class="verdict v-green">✓</span></td></tr>
 <tr><td>4-3</td><td>配合巡检标准迭代</td><td>KPI4 · 15%</td><td>P3</td><td>标准迭代反馈/验证支持；决策定稿留本部</td><td><span class="verdict v-green">✓ 本次修正</span></td></tr>
 <tr><td>4-4</td><td>及时上报监控设备故障</td><td>KPI4 · 15%</td><td>P1</td><td>巡检附带项（上报记录）</td><td><span class="verdict v-green">✓</span></td></tr>
 <tr><td>4-5</td><td>相应配套工作零延误、零缺失</td><td>KPI4 · 15%</td><td>P1–P4</td><td>各包按期交付验收（整体性指标）</td><td><span class="verdict v-green">✓</span></td></tr>
-<tr><td>4-6</td><td>未按时输出月度/周度违规分析报表，−5 分/次</td><td>KPI4 · 15%</td><td>P3</td><td>→ 转化：未达标不计价/整改（不设扣分）</td><td><span class="verdict v-green">✓</span></td></tr>
+<tr><td>4-6</td><td>未按时输出月度/周度违规分析报表，−5 分/次</td><td>KPI4 · 15%</td><td>P3</td><td>→ 转化：该期不计价＋回池补齐；连续 2 期暂停邀请</td><td><span class="verdict v-green">✓</span></td></tr>
 <tr><td>4-7</td><td>报表奖励（优质 +1 / 工具方法论 +2，该项 +3 封顶）</td><td>KPI4 · 15%</td><td>P3</td><td>→ 转化：优质输出正向评估（可选激励，非扣罚）</td><td><span class="verdict v-green">✓</span></td></tr>
 </tbody>
 </table>
@@ -593,13 +595,27 @@ tr.total-row td.val-strong{color:var(--accent)}
 </div>
 <ul class="small">
 <li><strong>流程与时限（建议 · 影子期校准）</strong>：批次交付后 ≤2 个工作日完成判定；质量类抽检 ≥5%（阈值影子期定）；抽检一致率达标 → 整批通过。</li>
-<li><strong>不合格处置</strong>：该单位不予验收（不计价/返工）；批量不达标 → 复核并收紧后续批次匹配（运营动作，非罚款）；承接者可申诉 → 验收岗按公示规则复核（门店与店长不参与验收环节）。</li>
+<li><strong>不合格处置</strong>：该单位不予验收（不计价/返工，可申诉）；缺口 <strong>48h 内回池重发</strong>；连续 2 个计量周期未完成/查实虚报 → <strong>暂停邀请</strong>（人工复核·可申诉）；判定结果（含未达标）自动写入履约记录（只追加）。承接者申诉 → 验收岗按公示规则复核（门店与店长不参与验收环节）。</li>
 <li><strong>验收 → 结算</strong>：验收通过 → 平台结算通道打款（四流合一：验收流与资金流对应留痕）。</li>
 </ul>
 <div class="note">
   <div class="label">为什么「需求方验收」不等于「雇主验收」</div>
   <p>① 承揽关系中「定作人的必要监督检验权」是固有内容（09.0 附录 G · 民法典 770 条口径）——验收主体是需求方，本身不构成雇佣证据；② 240 号（白名单）：接单完全自主时，运营质量验收/管理可共存；237 号穿透的是「不可拒单＋算法＋奖惩」——风险在「方式管理化」，不在验收主体身份；③ 门店/店长<strong>零参与验收</strong>（利益冲突＋现场管理风险）——门店的角色＝被稽核对象与整改执行方（独立业务流）。<strong>表述纪律</strong>：本设计＝「无支配性管理特征、可举证可审计」；个案认定属整体事实判断（非法律意见，落地前律师复核）。</p>
 </div>
+
+<h3>5.5 履约保障与回池机制（个人承接口径 · 不设罚款式约束）</h3>
+<p class="small">总则：不设惩罚性扣款、不设评分挂钩收入（红线不变）；以「<strong>没做的不给钱 ＋ 缺口回池兜底 ＋ 未来订单的市场后果 ＋ 正向优先权</strong>」替代罚款式约束——约束力来自市场，不来自惩戒。</p>
+<ol class="small">
+<li><strong>交付时限</strong>（发单前公示 · 承揽交付期条款）：P1 周批次截止按周公示（示例：周日 24:00）｜P2 单笔 ≤24h｜P3 按期交付；时限≠考勤、≠过程考核。</li>
+<li><strong>未完成处置三步链</strong>：① 未做部分不计价（无报酬、无罚款）；② 缺口 <strong>48h 内回池重发</strong>（重新发布供池内他人认领 · 原单价＋优先权；非指派）；③ 整批未交付＝该批不成立。</li>
+<li><strong>归责区分</strong>：监控故障等非承接者原因 → 凭上报记录不计缺口、不触发任何后续；故障修复后异常门店回池补做。</li>
+<li><strong>持续违约的市场后果</strong>（人工·留痕·可申诉·分级）：连续 2 个计量周期未完成/查实虚报 → 暂停【优先邀请与复聘优先权】（回到普通池，仍可自主认领公开任务）；查实造假等严重情形 → 人工复核后暂停承接资格（可申诉）；均不影响已验收报酬。</li>
+<li><strong>履约事实记录（为信用档案 / 信用积分铺垫）</strong>：所有「未达标」事件（未完成、超期、返工、瑕疵、查实虚报、暂停邀请等）自动写入履约记录——只追加、不可改、可查询、可申诉复核；当前用途＝准入复核与优先权评估的依据；信用积分机制为<strong>预留设计</strong>（规则另行制定：不与单笔报酬自动挂钩、算法留痕、可申诉；上线前律师复核）。</li>
+<li><strong>正向杠杆</strong>：100% 达标 → 优先复聘、优先派包、加价邀请（对应 KPI4-7 正向评估）。</li>
+<li><strong>供给冗余</strong>（回池兜底的前提）：每 20 席配 ≥20% 候选承接池（复聘池优先＋新招募）；回池任务 48h 到位率 ≥95%（示例值 · 试点校准）。</li>
+<li><strong>对客户承诺</strong>：到位率、批次及时交付率＝平台运营指标（对客户 SLA）——平台保证「做完」，不以「能罚个体」为卖点。</li>
+<li><strong>界限</strong>：不含过程管理、不含强制派单、不含惩罚性扣款；「暂停邀请/资格」按 240 号口径（接单自主＋人工复核＋可申诉＋留痕）设计——列律师复核项。</li>
+</ol>
 
 <h2 id="s6">6｜避雷红线清单（试点版）</h2>
 <ol>
@@ -639,16 +655,16 @@ tr.total-row td.val-strong{color:var(--accent)}
   <h4>配套</h4>
   <ul class="small">
     <li>成本口径（B vs C）见同目录 <a href="https://zhaoleyu79-ux.github.io/everyday-pilot-cost/">《12.线上督查试点-成本对比（B vs C）.html》</a>；C 态即按本页 P1–P4 口径计价。</li>
-    <li>明细表：11.商学苑-线上督查（胜任力模型+岗位职责+面试评估表）V1.4.xlsx →「试点·线上督查切片」页（单价与成本页联动；历史版本见 06 落地执行/归档/）。</li>
+    <li>明细表：11.商学苑-线上督查（胜任力模型+岗位职责+面试评估表）V1.5.xlsx →「试点·线上督查切片」页（单价与成本页联动；历史版本见 06 落地执行/归档/）。</li>
     <li>方法论：09.0 §3–§4｜04 主报告/判定矩阵/机制说明｜09.5 客问预判｜09.4 P18/P19。</li>
   </ul>
 </div>
 
 <div class="discipline">
-  <p><strong>口径声明：</strong>本页为设计建议稿 v0.3（2026-10-15），非法律意见；判定口径＝可任务化 高/中/低（2026-10-10 全库统一，本轮不使用非全日制容器）；单价与单量为 F 级估算，试点实测校准；对外展示前按 09.5 纪律复核。历史版本：归档/（v0.1–v0.2）；本版（v0.3）与工作簿 V1.4 配套。</p>
+  <p><strong>口径声明：</strong>本页为设计建议稿 v0.4（2026-10-15），非法律意见；判定口径＝可任务化 高/中/低（2026-10-10 全库统一，本轮不使用非全日制容器）；单价与单量为 F 级估算，试点实测校准；对外展示前按 09.5 纪律复核。历史版本：归档/（v0.1–v0.3）；本版（v0.4）与工作簿 V1.5 配套。</p>
 </div>
 
-<p class="muted">生成：2026-10-15 ｜ 数据源：《06 落地执行/11.商学苑-线上督查（胜任力模型+岗位职责+面试评估表）V1.4.xlsx》｜配套：<a href="https://zhaoleyu79-ux.github.io/everyday-pilot-cost/">《12.线上督查试点-成本对比（B vs C）.html》</a></p>
+<p class="muted">生成：2026-10-15 ｜ 数据源：《06 落地执行/11.商学苑-线上督查（胜任力模型+岗位职责+面试评估表）V1.5.xlsx》｜配套：<a href="https://zhaoleyu79-ux.github.io/everyday-pilot-cost/">《12.线上督查试点-成本对比（B vs C）.html》</a></p>
 
 </div>
 <script>
